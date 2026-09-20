@@ -10,8 +10,9 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8085',
+        target: process.env.VITE_BACKEND_TARGET || 'https://hiresphereai.onrender.com',
         changeOrigin: true,
+        secure: false,
       },
     },
   },
