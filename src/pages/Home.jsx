@@ -121,7 +121,7 @@ const Home = () => {
                   <span className="badge badge-primary">{job.employmentType || 'FULL_TIME'}</span>
                 </div>
                 <p className="job-company" style={{ fontWeight: 600, color: 'var(--primary)' }}>
-                  🏢 {job.company || 'Enterprise Company'}
+                  🏢 {job.company || job.companyName || 'Hiring Organization'}
                 </p>
                 <div className="job-meta">
                   <span>📍 {job.location}</span>

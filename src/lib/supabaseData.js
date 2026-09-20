@@ -9,7 +9,7 @@ export const normalizeJob = (job) => {
   if (!job) return null;
   return {
     ...job,
-    companyName: job.company || job.company_name || 'TechCorp Solutions',
+    companyName: job.company || job.company_name || 'Hiring Company',
     employmentType: job.employment_type || job.job_type || 'FULL_TIME',
     salaryRange: job.salary_range || 'Competitive',
     experienceRequired: job.experience_required || job.experience || 'Fresher / 0-2 years',
