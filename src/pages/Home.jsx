@@ -9,6 +9,13 @@ const Home = () => {
   const { isConnected } = useRealtime();
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('anassidd7256@gmail.com');
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2500);
+  };
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -161,6 +168,105 @@ const Home = () => {
               <span className="feature-icon">🎯</span>
               <h3>Autonomous Screening</h3>
               <p>Gemini-powered semantic fit analysis highlights exact strengths, skill gaps, and custom technical interview questions.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Engineering & Creator Showcase */}
+      <section className="developer-spotlight-section">
+        <div className="section-container">
+          <div className="developer-spotlight-card animate-fade-in">
+            {/* Left: Avatar & Live Status */}
+            <div className="developer-spotlight-avatar-col">
+              <div className="developer-spotlight-avatar">
+                <span className="avatar-initials">AS</span>
+                <span className="avatar-pulse-ring"></span>
+              </div>
+              <div className="developer-status-pill">
+                <span className="pulsing-green-dot"></span>
+                <span>Open to Opportunities</span>
+              </div>
+            </div>
+
+            {/* Middle: Bio & Engineering Stack */}
+            <div className="developer-spotlight-info-col">
+              <div className="spotlight-eyebrow">
+                <span>ENGINEERED &amp; ARCHITECTED BY</span>
+              </div>
+              <h2 className="spotlight-name">Anas Siddiqui</h2>
+              <p className="spotlight-tagline">
+                Creator &bull; Full-Stack &amp; Autonomous AI Systems Engineer
+              </p>
+              <p className="spotlight-desc">
+                Architected and engineered HireSphere AI end-to-end &mdash; unifying Spring Boot 3 microservices, an embedded zero-latency persistent H2 DBMS, real-time Server-Sent Events (SSE), and Google Gemini multi-agent autonomous intelligence into a production-grade recruitment ecosystem.
+              </p>
+
+              <div className="spotlight-skills">
+                <span className="tech-badge">Java 17 &bull; Spring Boot 3</span>
+                <span className="tech-badge">React 19 &bull; Vite</span>
+                <span className="tech-badge">Google Gemini AI</span>
+                <span className="tech-badge">Embedded DBMS Engine</span>
+                <span className="tech-badge">Server-Sent Events (SSE)</span>
+                <span className="tech-badge">Docker &bull; Render &bull; Vercel</span>
+              </div>
+            </div>
+
+            {/* Right: Contact & Hire Action Hub */}
+            <div className="developer-spotlight-action-col">
+              <div className="action-hub-header">
+                <h4>Contact Developer</h4>
+                <p>Connect for engineering roles, technical inquiries, or collaborations.</p>
+              </div>
+
+              <div className="action-hub-buttons">
+                <a
+                  href="https://www.linkedin.com/in/anas-siddiqui-b46a23209"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="spotlight-btn btn-linkedin"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c.96 0 1.74-.78 1.74-1.74a1.74 1.74 0 0 0-1.74-1.74c-.96 0-1.74.78-1.74 1.74 0 .96.78 1.74 1.74 1.74m1.4 9.74v-8.37H5.06v8.37h2.8Z" />
+                  </svg>
+                  <span>Connect on LinkedIn</span>
+                </a>
+
+                <a
+                  href="https://github.com/anas-byte-dev"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="spotlight-btn btn-github"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z" />
+                  </svg>
+                  <span>GitHub Repository &amp; Profile</span>
+                </a>
+
+                <a
+                  href="mailto:anassidd7256@gmail.com"
+                  className="spotlight-btn btn-email"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                  <span>Send Email &bull; Hire Me</span>
+                </a>
+              </div>
+
+              <div className="email-copy-box">
+                <span className="email-display">anassidd7256@gmail.com</span>
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="btn-copy-email"
+                  title="Copy email to clipboard"
+                >
+                  {copiedEmail ? 'Copied! ✓' : 'Copy'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
