@@ -23,8 +23,68 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Native fetch/XHR fallback adapter
-const defaultAdapter = axios.defaults.adapter;
+// Native fetch/XHR fallback adapter (compatible with Axios v1.7+ where defaults.adapter is an array)
+const executeNativeRequest = async (config) => {
+  try {
+    if (typeof axios.getAdapter === 'function') {
+      const adapter = axios.getAdapter(axios.defaults.adapter);
+      if (typeof adapter === 'function') {
+        return await adapter(config);
+      }
+    }
+    if (typeof axios.defaults.adapter === 'function') {
+      return await axios.defaults.adapter(config);
+    }
+  } catch (adapterErr) {
+    // If axios adapter resolution fails, fall back to native browser fetch
+  }
+
+  // Pure browser fetch fallback
+  const base = config.baseURL || API_BASE_URL || '';
+  const url = config.url ? (config.url.startsWith('http') ? config.url : `${base.replace(/\/+$/, '')}/${config.url.replace(/^\/+/, '')}`) : base;
+  const headers = { ...(config.headers || {}) };
+  delete headers.common;
+  delete headers.get;
+  delete headers.post;
+  delete headers.put;
+  delete headers.delete;
+  delete headers.patch;
+
+  const response = await fetch(url, {
+    method: (config.method || 'get').toUpperCase(),
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    body: config.data ? (typeof config.data === 'string' ? config.data : JSON.stringify(config.data)) : undefined,
+  });
+
+  const text = await response.text();
+  let data = text;
+  try {
+    data = JSON.parse(text);
+  } catch {}
+
+  if (!response.ok) {
+    const error = new Error(data?.error || data?.message || `Request failed with status ${response.status}`);
+    error.response = {
+      data,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      config,
+    };
+    throw error;
+  }
+
+  return {
+    data,
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+    config,
+  };
+};
 
 /**
  * Supabase Transparent Data Interceptor
@@ -32,7 +92,7 @@ const defaultAdapter = axios.defaults.adapter;
  */
 axiosClient.defaults.adapter = async (config) => {
   if (!isSupabaseConfigured()) {
-    return defaultAdapter(config);
+    return executeNativeRequest(config);
   }
 
   const url = (config.url || '').replace(/^\/api/, '');
@@ -278,8 +338,8 @@ axiosClient.defaults.adapter = async (config) => {
       return makeResponse(res);
     }
 
-    // Unhandled paths fall back to the default adapter
-    return defaultAdapter(config);
+    // Unhandled paths fall back to the default native adapter
+    return executeNativeRequest(config);
   } catch (err) {
     console.error('Supabase adapter request error on', method, path, err);
     return Promise.reject({
