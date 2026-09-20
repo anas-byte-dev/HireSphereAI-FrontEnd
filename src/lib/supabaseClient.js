@@ -96,10 +96,15 @@ export const signUpWithEmail = async (email, password, metadata = {}) => {
     throw new Error('Supabase is not configured yet. Please configure frontend/.env.');
   }
 
+  const redirectUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/login`
+    : 'http://localhost:5175/login';
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: redirectUrl,
       data: metadata,
     },
   });

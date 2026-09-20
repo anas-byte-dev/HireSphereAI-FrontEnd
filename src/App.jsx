@@ -36,6 +36,9 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/auth/callback" element={<Login />} />
+                <Route path="/auth/confirm" element={<Login />} />
+                <Route path="/verify-email" element={<Login />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/jobs/:id" element={<JobDetails />} />
                 <Route path="/ai-coach" element={<AiInterview />} />

@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
-import { useRealtime } from '../context/RealtimeContext';
 
 const Home = () => {
   const { user, role } = useAuth();
-  const { isConnected } = useRealtime();
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -35,12 +33,6 @@ const Home = () => {
     <div className="home-page animate-fade-in">
       <section className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>⚡ Next-Gen Autonomous AI & Real-Time Sync</span>
-            <span style={{ fontSize: '0.75rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: isConnected ? '#16a34a' : '#ef4444', color: '#fff' }}>
-              {isConnected ? 'Real-Time DB Active' : 'Connecting...'}
-            </span>
-          </div>
           <h1>
             Transform Your Placement Journey with <span className="hero-highlight">HireSphere AI</span>
           </h1>

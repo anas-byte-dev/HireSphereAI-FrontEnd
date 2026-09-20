@@ -1,16 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useRealtime } from '../context/RealtimeContext';
-import { isGeminiConfigured } from '../services/geminiClient';
-import AiConfigModal from './AiConfigModal';
 
 const Navbar = () => {
   const { user, role, logout } = useAuth();
-  const { isConnected } = useRealtime();
   const navigate = useNavigate();
-  const [showAiModal, setShowAiModal] = useState(false);
-  const geminiActive = isGeminiConfigured();
 
   const handleLogout = async () => {
     await logout();
@@ -20,60 +14,14 @@ const Navbar = () => {
   const getNavLinkClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
 
   return (
-    <>
-      <header className="navbar">
-        <div className="navbar-container">
-          <Link to="/" className="navbar-logo">
-            <span className="logo-icon" style={{ filter: 'drop-shadow(0 2px 4px rgba(37, 99, 235, 0.4))' }}>🌐</span>
-            <span className="logo-text" style={{ background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>
-              HireSphere <span style={{ fontSize: '0.75em', padding: '0.1rem 0.35rem', background: '#2563eb', color: '#fff', borderRadius: '4px', WebkitTextFillColor: '#fff', verticalAlign: 'middle' }}>AI</span>
-            </span>
-          </Link>
-
-          {/* Status Badges Group */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginLeft: '0.5rem' }}>
-            {/* Real-time DB Status Badge */}
-            <div
-              title={isConnected ? 'Connected to persistent real-time database stream' : 'Reconnecting to database stream...'}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.2rem 0.55rem',
-                borderRadius: '999px',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                background: isConnected ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-                color: isConnected ? '#16a34a' : '#dc2626',
-                border: `1px solid ${isConnected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-              }}
-            >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isConnected ? '#22c55e' : '#ef4444', display: 'inline-block' }} />
-              <span>{isConnected ? 'Real-Time DB' : 'Connecting...'}</span>
-            </div>
-
-            {/* AI Status & Key Config Button */}
-            <button
-              onClick={() => setShowAiModal(true)}
-              title="Click to configure or view Gemini AI Key"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '999px',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                background: geminiActive ? 'rgba(37, 99, 235, 0.12)' : 'rgba(245, 158, 11, 0.12)',
-                color: geminiActive ? '#2563eb' : '#d97706',
-                border: `1px solid ${geminiActive ? 'rgba(37, 99, 235, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <span>{geminiActive ? '✨ Gemini Active' : '✨ Setup AI Key'}</span>
-            </button>
-          </div>
+    <header className="navbar">
+      <div className="navbar-container">
+        <Link to="/" className="navbar-logo">
+          <span className="logo-icon" style={{ filter: 'drop-shadow(0 2px 4px rgba(37, 99, 235, 0.4))' }}>🌐</span>
+          <span className="logo-text" style={{ background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>
+            HireSphere <span style={{ fontSize: '0.75em', padding: '0.1rem 0.35rem', background: '#2563eb', color: '#fff', borderRadius: '4px', WebkitTextFillColor: '#fff', verticalAlign: 'middle' }}>AI</span>
+          </span>
+        </Link>
 
         <nav className="navbar-links">
           <NavLink to="/" className={getNavLinkClass} end>
@@ -160,9 +108,6 @@ const Navbar = () => {
         </div>
       </div>
     </header>
-
-    <AiConfigModal isOpen={showAiModal} onClose={() => setShowAiModal(false)} />
-  </>
   );
 };
 

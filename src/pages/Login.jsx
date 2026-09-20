@@ -1,14 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { sendEmailOtp, verifyEmailOtp, isSupabaseConfigured } from '../lib/supabaseClient';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const verificationNotice = location.state?.verificationSent ? location.state.email : null;
+  const [confirmedNotice, setConfirmedNotice] = useState(false);
+  const [linkErrorNotice, setLinkErrorNotice] = useState('');
+
+  // If user is already authenticated (e.g. Supabase verified and signed in), redirect to dashboard
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'ADMIN') {
+        navigate('/dashboard/admin', { replace: true });
+      } else if (user.role === 'RECRUITER') {
+        navigate('/dashboard/recruiter', { replace: true });
+      } else {
+        navigate('/dashboard/candidate', { replace: true });
+      }
+    }
+  }, [user, navigate]);
+
+  // Detect email confirmation hash or query params from Supabase redirect
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const hash = window.location.hash || '';
+
+    if (searchParams.get('verified') === 'true' || hash.includes('type=signup') || hash.includes('access_token')) {
+      setConfirmedNotice(true);
+    }
+
+    if (hash.includes('error_description')) {
+      const hashParams = new URLSearchParams(hash.replace('#', '?'));
+      const desc = hashParams.get('error_description');
+      if (desc) {
+        setLinkErrorNotice(decodeURIComponent(desc.replace(/\+/g, ' ')));
+      }
+    }
+  }, [location]);
 
   const [authMode, setAuthMode] = useState('password'); // 'password' | 'otp'
   const [formData, setFormData] = useState({
@@ -122,6 +155,61 @@ const Login = () => {
       <div className="auth-card">
         <h2>Sign In to HireSphere AI</h2>
         <p className="auth-subtitle">Access your applications, live job tracking, and AI coaching chamber.</p>
+
+        {confirmedNotice && (
+          <div
+            className="alert alert-success"
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              backgroundColor: '#ecfdf5',
+              border: '1px solid #10b981',
+              color: '#065f46',
+              padding: '16px',
+              borderRadius: '10px',
+              marginBottom: '20px',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
+            }}
+          >
+            <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🎉</span>
+            <div>
+              <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+                Email Verified Successfully!
+              </strong>
+              <span style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
+                Your email has been confirmed. You can sign in below to access your HireSphere dashboard.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {linkErrorNotice && (
+          <div
+            className="alert alert-warning"
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              backgroundColor: '#fffbeb',
+              border: '1px solid #f59e0b',
+              color: '#92400e',
+              padding: '16px',
+              borderRadius: '10px',
+              marginBottom: '20px',
+            }}
+          >
+            <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>ℹ️</span>
+            <div>
+              <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
+                Email Confirmation Status
+              </strong>
+              <span style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
+                {linkErrorNotice}. If you already clicked the link in your email once, your account was already verified! Please enter your password below to sign in.
+              </span>
+            </div>
+          </div>
+        )}
 
         {verificationNotice && (
           <div

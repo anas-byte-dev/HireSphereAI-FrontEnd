@@ -272,10 +272,15 @@ export const AuthProvider = ({ children }) => {
     // 1. Try Supabase Auth
     if (isSupabaseConfigured()) {
       try {
+        const redirectUrl = typeof window !== 'undefined'
+          ? `${window.location.origin}/login`
+          : 'http://localhost:5175/login';
+
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
           options: {
+            emailRedirectTo: redirectUrl,
             data: {
               name,
               role: cleanRole,
