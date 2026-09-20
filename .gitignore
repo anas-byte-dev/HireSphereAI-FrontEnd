@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+.env
+.env.exapmle
+*.env
+hiresphere_realtime_db.mv.db

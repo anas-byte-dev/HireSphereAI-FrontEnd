@@ -2,7 +2,7 @@ import axios from 'axios';
 import { supabaseDb } from '../lib/supabaseData';
 import { isSupabaseConfigured } from '../lib/supabaseClient';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hiresphereai.onrender.com/api';
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,

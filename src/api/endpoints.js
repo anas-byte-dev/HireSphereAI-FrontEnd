@@ -1,12 +1,12 @@
-﻿/**
+/**
  * HireSphere AI - Master API Endpoints Registry
  * 
  * ALL API endpoints and routes in one centralized, easily accessible location.
  * Modify or inspect any API route directly from here.
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8085/api';
-export const REALTIME_STREAM_URL = import.meta.env.VITE_REALTIME_STREAM_URL || 'http://localhost:8085/api/realtime/stream';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hiresphereai.onrender.com/api';
+export const REALTIME_STREAM_URL = import.meta.env.VITE_REALTIME_STREAM_URL || 'https://hiresphereai.onrender.com/api/realtime/stream';
 export const SWAGGER_URL = import.meta.env.VITE_SWAGGER_URL || 'http://localhost:8085/swagger-ui.html';
 export const H2_CONSOLE_URL = import.meta.env.VITE_H2_CONSOLE_URL || 'http://localhost:8085/h2-console';
 
