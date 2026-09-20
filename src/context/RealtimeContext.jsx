@@ -3,7 +3,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
 const RealtimeContext = createContext(null);
 
-const STREAM_URL = import.meta.env.VITE_REALTIME_STREAM_URL || '/api/realtime/stream';
+const STREAM_URL = import.meta.env.VITE_REALTIME_STREAM_URL || 'https://hiresphereai.onrender.com/api/realtime/stream';
 
 export const RealtimeProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);

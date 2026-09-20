@@ -7,8 +7,8 @@
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://hiresphereai.onrender.com/api';
 export const REALTIME_STREAM_URL = import.meta.env.VITE_REALTIME_STREAM_URL || 'https://hiresphereai.onrender.com/api/realtime/stream';
-export const SWAGGER_URL = import.meta.env.VITE_SWAGGER_URL || 'http://localhost:8085/swagger-ui.html';
-export const H2_CONSOLE_URL = import.meta.env.VITE_H2_CONSOLE_URL || 'http://localhost:8085/h2-console';
+export const SWAGGER_URL = import.meta.env.VITE_SWAGGER_URL || 'https://hiresphereai.onrender.com/swagger-ui.html';
+export const H2_CONSOLE_URL = import.meta.env.VITE_H2_CONSOLE_URL || 'https://hiresphereai.onrender.com/h2-console';
 
 export const API_ENDPOINTS = {
   // System Health & Diagnostics
