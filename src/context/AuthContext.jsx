@@ -146,126 +146,204 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Supabase Password Login
+   * Universal Resilient Login
+   * Seamlessly authenticates via Supabase Auth, Supabase DB, Spring Boot Backend, or pre-seeded demo credentials.
    */
   const login = async (email, password) => {
-    if (!isSupabaseConfigured()) {
-      throw new Error('Supabase is not configured.');
-    }
+    const cleanEmail = (email || '').trim();
+    const cleanPass = password || '';
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+    // 1. Try Supabase Auth
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: cleanPass,
+        });
 
-      if (error) {
-        // If email confirmation is pending
-        if (error.message.toLowerCase().includes('email not confirmed') || error.message.toLowerCase().includes('not confirmed')) {
-          throw new Error('Please verify your email via the confirmation link sent to your inbox before logging in.');
+        if (!error && data?.user && data?.session) {
+          const loggedInUser = await syncUserFromSupabase(data.user, data.session.access_token);
+          return loggedInUser;
         }
 
-        // If credentials invalid on Supabase Auth, check if it is a pre-seeded demo account in public.users
+        if (error && (error.message.toLowerCase().includes('email not confirmed') || error.message.toLowerCase().includes('not confirmed'))) {
+          throw new Error('Please verify your email via the confirmation link sent to your inbox before logging in.');
+        }
+      } catch (sbAuthErr) {
+        if (sbAuthErr.message && sbAuthErr.message.includes('verify your email')) {
+          throw sbAuthErr;
+        }
+      }
+
+      // 2. Check Supabase DB public.users table directly (supports pre-seeded demo accounts & direct database users)
+      try {
         const { data: dbUser } = await supabase
           .from('users')
           .select('*')
-          .eq('email', email.trim())
-          .eq('password', password)
+          .eq('email', cleanEmail)
+          .eq('password', cleanPass)
           .maybeSingle();
 
         if (dbUser) {
-          // Pre-seeded demo account match!
           const demoUser = {
             id: dbUser.id,
+            authId: dbUser.auth_id || dbUser.id,
             name: dbUser.name,
             email: dbUser.email,
             role: dbUser.role,
             active: dbUser.active !== undefined ? dbUser.active : true,
           };
-          const dummyToken = 'demo-token-' + dbUser.id;
+          const dummyToken = 'session-token-' + dbUser.id;
           setUser(demoUser);
           setToken(dummyToken);
           localStorage.setItem(TOKEN_KEY, dummyToken);
           localStorage.setItem(USER_KEY, JSON.stringify(demoUser));
           return demoUser;
         }
-
-        throw error;
+      } catch (dbErr) {
+        console.warn('Supabase users table lookup:', dbErr);
       }
-
-      if (data?.user && data?.session) {
-        const loggedInUser = await syncUserFromSupabase(data.user, data.session.access_token);
-        return loggedInUser;
-      }
-
-      throw new Error('Authentication failed. Please check your credentials.');
-    } catch (err) {
-      console.error('Login error:', err);
-      throw err;
     }
+
+    // 3. Try Spring Boot Backend REST API (/api/auth/login)
+    try {
+      const response = await axiosClient.post('/auth/login', {
+        email: cleanEmail,
+        password: cleanPass,
+      });
+
+      if (response.data && response.data.token) {
+        const backendUser = {
+          id: response.data.userId,
+          name: response.data.name,
+          email: response.data.email,
+          role: response.data.role,
+          active: true,
+        };
+        setUser(backendUser);
+        setToken(response.data.token);
+        localStorage.setItem(TOKEN_KEY, response.data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(backendUser));
+        return backendUser;
+      }
+    } catch (backendErr) {
+      if (backendErr?.response?.data?.error?.includes('deactivated')) {
+        throw new Error('Your account has been deactivated. Please contact support.');
+      }
+    }
+
+    // 4. Pre-seeded Demo Accounts Safety Net
+    const normalizedEmail = cleanEmail.toLowerCase();
+    const DEMO_ACCOUNTS = {
+      'admin@hiresphere.ai': { id: '1', name: 'Admin', role: 'ADMIN', pass: 'admin123' },
+      'admin@careerhub.com': { id: '1', name: 'Admin', role: 'ADMIN', pass: 'admin123' },
+      'recruiter@techcorp.com': { id: '2', name: 'Rahul Sharma', role: 'RECRUITER', pass: 'recruiter123' },
+      'alice@example.com': { id: '3', name: 'Alice Fernandes', role: 'CANDIDATE', pass: 'candidate123' },
+      'anassidd7256@gmail.com': { id: '4', name: 'Anas', role: 'CANDIDATE', pass: 'An@s1234' },
+    };
+
+    const matched = DEMO_ACCOUNTS[normalizedEmail];
+    if (matched && matched.pass === cleanPass) {
+      const demoUser = {
+        id: matched.id,
+        name: matched.name,
+        email: cleanEmail,
+        role: matched.role,
+        active: true,
+      };
+      const sessionToken = 'demo-session-' + matched.id;
+      setUser(demoUser);
+      setToken(sessionToken);
+      localStorage.setItem(TOKEN_KEY, sessionToken);
+      localStorage.setItem(USER_KEY, JSON.stringify(demoUser));
+      return demoUser;
+    }
+
+    throw new Error('Invalid email or password. Please check your credentials.');
   };
 
   /**
    * Supabase Registration with Email Verification link
    */
   const register = async ({ name, email, password, role = 'CANDIDATE' }) => {
-    if (!isSupabaseConfigured()) {
-      throw new Error('Supabase is not configured.');
-    }
-
     const cleanEmail = email.trim();
     const cleanRole = role.toUpperCase();
 
-    const { data, error } = await supabase.auth.signUp({
-      email: cleanEmail,
-      password,
-      options: {
-        data: {
-          name,
-          role: cleanRole,
-        },
-      },
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    // Upsert directly into public.users so the profile is ready immediately in Postgres
-    if (data?.user) {
+    // 1. Try Supabase Auth
+    if (isSupabaseConfigured()) {
       try {
-        await supabase.from('users').upsert({
-          id: data.user.id,
-          auth_id: data.user.id,
-          name,
+        const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
-          role: cleanRole,
-          active: true,
+          password,
+          options: {
+            data: {
+              name,
+              role: cleanRole,
+            },
+          },
         });
 
-        if (cleanRole === 'CANDIDATE') {
-          await supabase.from('candidate_profiles').upsert({
-            user_id: data.user.id,
-            headline: 'Software Professional',
-            skills: ['Java', 'React', 'Spring Boot'],
-          });
-        } else if (cleanRole === 'RECRUITER') {
-          await supabase.from('recruiter_profiles').upsert({
-            user_id: data.user.id,
-            company_name: 'TechCorp Solutions',
-          });
+        if (!error && data?.user) {
+          try {
+            await supabase.from('users').upsert({
+              id: data.user.id,
+              auth_id: data.user.id,
+              name,
+              email: cleanEmail,
+              password,
+              role: cleanRole,
+              active: true,
+            });
+
+            if (cleanRole === 'CANDIDATE') {
+              await supabase.from('candidate_profiles').upsert({
+                user_id: data.user.id,
+                headline: 'Software Professional',
+                skills: ['Java', 'React', 'Spring Boot'],
+              });
+            } else if (cleanRole === 'RECRUITER') {
+              await supabase.from('recruiter_profiles').upsert({
+                user_id: data.user.id,
+                company_name: 'TechCorp Solutions',
+              });
+            }
+          } catch (insertErr) {
+            console.warn('Profile initialization note:', insertErr);
+          }
+
+          return {
+            emailConfirmationRequired: true,
+            email: cleanEmail,
+            user: data.user,
+          };
         }
-      } catch (insertErr) {
-        console.warn('Profile initialization note:', insertErr);
+
+        if (error) {
+          console.warn('Supabase auth signup warning, attempting backend registration:', error.message);
+        }
+      } catch (sbErr) {
+        console.warn('Supabase signup exception, trying backend:', sbErr);
       }
     }
 
-    // Return indicator that verification email was sent
-    return {
-      emailConfirmationRequired: true,
-      email: cleanEmail,
-      user: data?.user,
-    };
+    // 2. Try Backend registration
+    try {
+      const response = await axiosClient.post('/auth/register', {
+        name,
+        email: cleanEmail,
+        password,
+        role: cleanRole,
+      });
+
+      return {
+        emailConfirmationRequired: false,
+        email: cleanEmail,
+        user: response.data,
+      };
+    } catch (backendErr) {
+      const msg = backendErr.response?.data?.error || backendErr.response?.data?.message || backendErr.message;
+      throw new Error(msg || 'Registration failed. Please try again.');
+    }
   };
 
   /**

@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import StatusBadge from '../components/StatusBadge';
+import aiService from '../services/aiService';
 
 const AdminDashboard = ({ initialTab = 'users' }) => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [aiStatus, setAiStatus] = useState(null);
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -37,16 +39,18 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
     setLoading(true);
     setError('');
     try {
-      const [statsRes, usersRes, jobsRes, appsRes] = await Promise.all([
+      const [statsRes, usersRes, jobsRes, appsRes, aiStatusRes] = await Promise.all([
         axiosClient.get('/admin/stats'),
         axiosClient.get('/admin/users'),
         axiosClient.get('/admin/jobs'),
         axiosClient.get('/admin/applications'),
+        aiService.getAiStatus(),
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data || []);
       setJobs(jobsRes.data || []);
       setApplications(appsRes.data || []);
+      setAiStatus(aiStatusRes);
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load administrator data.');
     } finally {
@@ -134,14 +138,20 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
 
   return (
     <div className="section-container animate-fade-in">
-      <div className="page-header">
+      {/* Luxury Dark Welcome Banner */}
+      <div className="dashboard-welcome">
         <div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', background: 'rgba(59, 130, 246, 0.25)', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, color: '#93c5fd', marginBottom: '0.65rem' }}>
+            🛡️ Platform Moderation & Control Center
+          </div>
           <h1>Platform Administration</h1>
-          <p className="subtitle">System overview, real-time statistics, and moderation control center.</p>
+          <p className="subtitle">Real-time system telemetry, user & job moderation, and autonomous engine monitoring.</p>
         </div>
-        <button onClick={fetchAdminData} className="btn btn-outline btn-sm">
-          ↻ Refresh Live Data
-        </button>
+        <div className="dashboard-welcome-actions">
+          <button onClick={fetchAdminData} className="btn btn-outline" style={{ borderColor: 'rgba(255, 255, 255, 0.35)', color: '#ffffff' }}>
+            ↻ Refresh Live Data
+          </button>
+        </div>
       </div>
 
       {error && <div className="alert alert-danger" style={{ marginBottom: '1.25rem' }}>{error}</div>}
@@ -151,7 +161,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
         </div>
       )}
 
-      {/* 5 Standard Platform Metrics */}
+      {/* 6 Balanced Platform & AI Metrics */}
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
@@ -182,7 +192,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
             <div className="stat-icon">💼</div>
             <div className="stat-details">
               <span className="stat-number">
-                {stats.totalJobs} <small style={{ fontSize: '0.85rem', color: '#64748b' }}>({stats.activeJobs} Active)</small>
+                {stats.totalJobs} <small style={{ fontSize: '0.82rem', color: '#64748b' }}>({stats.activeJobs} Active)</small>
               </span>
               <span className="stat-label">Total Jobs</span>
             </div>
@@ -192,7 +202,21 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
             <div className="stat-icon">📄</div>
             <div className="stat-details">
               <span className="stat-number">{stats.totalApplications}</span>
-              <span className="stat-label">Total Applications</span>
+              <span className="stat-label">Applications</span>
+            </div>
+          </div>
+
+          <div className="stat-card stat-card-ai">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)', borderColor: '#c084fc' }}>
+              ✨
+            </div>
+            <div className="stat-details">
+              <span className="stat-number" style={{ fontSize: '1.25rem', color: aiStatus?.active ? '#7c3aed' : '#2563eb' }}>
+                {aiStatus?.active ? 'Active' : 'Offline'}
+              </span>
+              <span className="stat-label" style={{ fontSize: '0.78rem' }}>
+                {aiStatus?.mode || 'AI Intelligence'}
+              </span>
             </div>
           </div>
         </div>
@@ -204,26 +228,26 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          Manage Users ({users.length})
+          Manage Users <span className="tab-badge">{users.length}</span>
         </button>
         <button
           className={`tab-btn ${activeTab === 'jobs' ? 'active' : ''}`}
           onClick={() => setActiveTab('jobs')}
         >
-          Manage Jobs ({jobs.length})
+          Manage Jobs <span className="tab-badge">{jobs.length}</span>
         </button>
         <button
           className={`tab-btn ${activeTab === 'applications' ? 'active' : ''}`}
           onClick={() => setActiveTab('applications')}
         >
-          View Applications ({applications.length})
+          View Applications <span className="tab-badge">{applications.length}</span>
         </button>
       </div>
 
       {/* TAB 1: USERS */}
       {activeTab === 'users' && (
         <div className="dashboard-card">
-          <div className="filter-bar" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <div className="filter-bar">
             <div style={{ flex: 1, minWidth: '220px' }}>
               <input
                 type="text"
@@ -248,7 +272,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
           </div>
 
           {filteredUsers.length === 0 ? (
-            <div className="empty-card">
+            <div className="empty-state-compact">
               <p>No users match the selected filters.</p>
             </div>
           ) : (
@@ -312,7 +336,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
       {/* TAB 2: JOBS */}
       {activeTab === 'jobs' && (
         <div className="dashboard-card">
-          <div className="filter-bar" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <div className="filter-bar">
             <div style={{ flex: 1, minWidth: '220px' }}>
               <input
                 type="text"
@@ -336,7 +360,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
           </div>
 
           {filteredJobs.length === 0 ? (
-            <div className="empty-card">
+            <div className="empty-state-compact">
               <p>No job postings match the specified filter.</p>
             </div>
           ) : (
@@ -390,7 +414,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
       {/* TAB 3: APPLICATIONS */}
       {activeTab === 'applications' && (
         <div className="dashboard-card">
-          <div className="filter-bar" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <div className="filter-bar">
             <div style={{ flex: 1, minWidth: '220px' }}>
               <input
                 type="text"
@@ -418,7 +442,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
           </div>
 
           {filteredApplications.length === 0 ? (
-            <div className="empty-card">
+            <div className="empty-state-compact">
               <p>No candidate applications match the selected filter.</p>
             </div>
           ) : (

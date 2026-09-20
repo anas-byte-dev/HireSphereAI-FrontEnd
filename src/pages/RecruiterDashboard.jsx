@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import aiService from '../services/aiService';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 
@@ -8,6 +9,7 @@ const RecruiterDashboard = () => {
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [totalApplicants, setTotalApplicants] = useState(0);
+  const [interviewsCount, setInterviewsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showPostForm, setShowPostForm] = useState(false);
   const [editingJob, setEditingJob] = useState(null); // null or job object
@@ -33,26 +35,28 @@ const RecruiterDashboard = () => {
     setMessage({ type: '', text: '' });
     try {
       const skills = newJob.requirements ? newJob.requirements.split(',').map(s => s.trim()).filter(Boolean) : [];
-      const res = await axiosClient.post('/ai/generate-job', {
+      const spec = await aiService.generateJobSpec({
         title: newJob.title,
         experience: '0-2 years',
         location: newJob.location || 'Remote',
         targetSkills: skills,
       });
-      if (res.data) {
+
+      if (spec) {
         setNewJob((prev) => ({
           ...prev,
-          description: res.data.description || prev.description,
-          salary: res.data.recommendedSalary || prev.salary,
-          requirements: Array.isArray(res.data.suggestedSkills)
-            ? res.data.suggestedSkills.join(', ')
-            : (res.data.requirements || prev.requirements),
+          description: spec.description || prev.description,
+          salary: spec.recommendedSalary || prev.salary,
+          requirements: Array.isArray(spec.suggestedSkills)
+            ? spec.suggestedSkills.join(', ')
+            : (spec.requirements || prev.requirements),
         }));
-        setMessage({ type: 'success', text: '✨ Job details autonomously drafted by HireSphere AI!' });
+        const sourceNotice = spec.generatedBy ? ` (${spec.generatedBy})` : '';
+        setMessage({ type: 'success', text: `✨ Position drafted autonomously by HireSphere AI${sourceNotice}!` });
       }
     } catch (err) {
       console.error('AI generation error:', err);
-      setMessage({ type: 'danger', text: 'Failed to generate job with AI.' });
+      setMessage({ type: 'danger', text: 'Failed to generate job with AI. Please check your AI settings.' });
     } finally {
       setGeneratingAi(false);
     }
@@ -81,9 +85,13 @@ const RecruiterDashboard = () => {
   const loadRecruiterJobs = async () => {
     setLoading(true);
     try {
-      const res = await axiosClient.get(`/jobs/recruiter/${user.id}`);
+      const [res, intRes] = await Promise.all([
+        axiosClient.get(`/jobs/recruiter/${user.id}`).catch(() => ({ data: [] })),
+        axiosClient.get(`/interviews/recruiter/${user.id}`).catch(() => ({ data: [] })),
+      ]);
       const jobList = res.data || [];
       setJobs(jobList);
+      setInterviewsCount((intRes.data || []).length);
 
       // Count total applicants across recruiter's jobs
       let applicantCount = 0;
@@ -287,10 +295,20 @@ const RecruiterDashboard = () => {
               type="button"
               onClick={handleAiGenerateJob}
               disabled={generatingAi}
-              className="btn btn-outline"
-              style={{ borderColor: '#2563eb', color: '#2563eb', fontWeight: 600 }}
+              className="btn btn-ai-sparkle"
+              title="Autonomously drafts high-converting responsibilities, requirements, and compensation"
             >
-              {generatingAi ? '✨ Drafting with AI...' : '✨ Auto-Draft with Gemini AI'}
+              {generatingAi ? (
+                <>
+                  <span className="btn-spinner" style={{ borderTopColor: '#fff' }} />
+                  <span>✨ Drafting with Gemini AI...</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: '1.1rem' }}>✨</span>
+                  <span>Auto-Draft with Gemini AI</span>
+                </>
+              )}
             </button>
           </div>
           <form onSubmit={handlePostJob} style={{ marginTop: '1.25rem' }}>
@@ -521,19 +539,30 @@ const RecruiterDashboard = () => {
         <div className="stat-card">
           <div className="stat-icon">📅</div>
           <div className="stat-details">
-            <Link to="/interviews" className="stat-link" style={{ fontSize: '1.1rem', fontWeight: 600 }}>
-              Manage Interviews &rarr;
-            </Link>
-            <span className="stat-label">Schedule & Notes</span>
+            <span className="stat-number">{interviewsCount}</span>
+            <span className="stat-label">Interviews Scheduled</span>
           </div>
+          <Link to="/interviews" className="stat-link">Manage &rarr;</Link>
         </div>
       </div>
 
       {/* Posted Jobs Management Table */}
       <div className="dashboard-card" style={{ marginTop: '2rem' }}>
         <div className="dashboard-card-header">
-          <h3>Your Job Postings</h3>
-          <span className="subtext">{jobs.length} total positions</span>
+          <div>
+            <h3>Your Job Postings</h3>
+            <p className="subtext">{jobs.length} total positions under your account</p>
+          </div>
+          <button
+            onClick={() => {
+              setEditingJob(null);
+              setShowPostForm(true);
+              window.scrollTo({ top: 120, behavior: 'smooth' });
+            }}
+            className="btn btn-primary btn-sm"
+          >
+            + Create New Position
+          </button>
         </div>
 
         {loading ? (
@@ -559,7 +588,7 @@ const RecruiterDashboard = () => {
                   <th>Location</th>
                   <th>Status</th>
                   <th>Applicants</th>
-                  <th>Actions</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -573,7 +602,7 @@ const RecruiterDashboard = () => {
                       </strong>
                       <div className="subtext">ID: #{j.id} &bull; Posted: {j.postedDate || 'Recent'}</div>
                     </td>
-                    <td>{j.jobType || 'Full-time'}</td>
+                    <td><span className="badge badge-primary">{j.jobType || 'Full-time'}</span></td>
                     <td>{j.location}</td>
                     <td>
                       <span className={`badge ${j.active ? 'badge-success' : 'badge-danger'}`}>
@@ -581,12 +610,12 @@ const RecruiterDashboard = () => {
                       </span>
                     </td>
                     <td>
-                      <Link to={`/applications`} className="btn btn-outline btn-sm">
+                      <Link to="/applications" className="btn btn-outline btn-sm">
                         View Applicants &rarr;
                       </Link>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', minWidth: '230px' }}>
+                      <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                         <button
                           onClick={() => handleEditJobClick(j)}
                           className="btn btn-outline btn-sm"
@@ -606,9 +635,7 @@ const RecruiterDashboard = () => {
                           disabled={deletingId === j.id}
                         >
                           {deletingId === j.id ? (
-                            <>
-                              <span className="btn-spinner"></span>
-                            </>
+                            <span className="btn-spinner" />
                           ) : (
                             '🗑️ Delete'
                           )}

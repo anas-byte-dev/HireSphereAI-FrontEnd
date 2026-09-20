@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Centralized Supabase credentials from environment (.env)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Centralized Supabase credentials from environment (.env) with robust fallback
+const FALLBACK_URL = 'https://esbvwqjdabcmbqubfffi.supabase.co';
+const FALLBACK_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzYnZ3cWpkYWJjbWJxdWJmZmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4OTYxODksImV4cCI6MjEwNTQ3MjE4OX0.9VCCQ3QIYYfgLjyeI_LcV-Te_D-89_lPpCfEq8YTtHY';
+
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || FALLBACK_URL).trim();
+const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY || FALLBACK_ANON_KEY).trim();
 
 // Singleton Supabase Client
 export const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)

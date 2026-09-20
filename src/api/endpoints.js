@@ -102,6 +102,9 @@ export const API_ENDPOINTS = {
 
     // Agent 3: AI Job Description & Skills Generator
     GENERATE_JOB: '/ai/generate-job',
+
+    // AI Engine Status & Diagnostics
+    STATUS: '/ai/status',
   },
 
   // Live Real-Time Server-Sent Events (SSE)

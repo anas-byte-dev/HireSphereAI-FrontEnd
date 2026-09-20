@@ -38,13 +38,26 @@ const CandidateDashboard = () => {
   return (
     <div className="section-container animate-fade-in">
       <div className="dashboard-welcome">
-        <h1>Welcome back, {user?.name || 'Candidate'}!</h1>
-        <p className="subtitle">Here is a snapshot of your job search activity and AI coaching progress on HireSphere AI.</p>
+        <div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.65rem', background: 'rgba(59, 130, 246, 0.25)', border: '1px solid rgba(147, 197, 253, 0.3)', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600, color: '#93c5fd', marginBottom: '0.65rem' }}>
+            <span>🚀 Candidate Career Hub</span>
+          </div>
+          <h1>Welcome back, {user?.name || 'Candidate'}!</h1>
+          <p className="subtitle">Track your job applications in real time, review interviews, and sharpen your technical skills with the AI Interview Coach.</p>
+        </div>
+        <div className="dashboard-welcome-actions">
+          <Link to="/jobs" className="btn btn-outline btn-sm" style={{ background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', borderColor: 'rgba(255, 255, 255, 0.25)' }}>
+            🔍 Browse Jobs
+          </Link>
+          <Link to="/ai-coach" className="btn btn-ai-sparkle btn-sm">
+            🤖 Practice with AI Coach
+          </Link>
+        </div>
       </div>
 
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon">📄</div>
+          <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb' }}>📄</div>
           <div className="stat-details">
             <span className="stat-number">{applications.length}</span>
             <span className="stat-label">Applications Submitted</span>
@@ -53,21 +66,30 @@ const CandidateDashboard = () => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">⭐</div>
+          <div className="stat-icon" style={{ background: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04' }}>⭐</div>
           <div className="stat-details">
             <span className="stat-number">{savedJobs.length}</span>
-            <span className="stat-label">Saved Jobs</span>
+            <span className="stat-label">Saved Bookmarks</span>
           </div>
-          <Link to="/saved-jobs" className="stat-link">View Bookmarks &rarr;</Link>
+          <Link to="/saved-jobs" className="stat-link">Saved &rarr;</Link>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">📅</div>
+          <div className="stat-icon" style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#16a34a' }}>📅</div>
           <div className="stat-details">
             <span className="stat-number">{interviews.length}</span>
             <span className="stat-label">Interviews Scheduled</span>
           </div>
-          <Link to="/interviews" className="stat-link">View Schedule &rarr;</Link>
+          <Link to="/interviews" className="stat-link">Schedule &rarr;</Link>
+        </div>
+
+        <div className="stat-card stat-card-ai">
+          <div className="stat-icon" style={{ background: 'rgba(124, 58, 237, 0.12)', color: '#7c3aed' }}>✨</div>
+          <div className="stat-details">
+            <span className="stat-number" style={{ fontSize: '1.25rem', color: '#6d28d9' }}>AI Coach</span>
+            <span className="stat-label">Mock Interview Ready</span>
+          </div>
+          <Link to="/ai-coach" className="stat-link" style={{ background: '#7c3aed', color: '#fff', borderColor: '#7c3aed' }}>Start &rarr;</Link>
         </div>
       </div>
 

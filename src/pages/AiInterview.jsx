@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axiosClient from '../api/axiosClient';
+import aiService from '../services/aiService';
+import { isGeminiConfigured } from '../services/geminiClient';
 import { useAuth } from '../context/AuthContext';
 import { useRealtime } from '../context/RealtimeContext';
 
@@ -35,17 +36,10 @@ export default function AiInterview() {
   const handleStartSession = async () => {
     setStarting(true);
     try {
-      const candidateId = user ? user.id : 3;
-      const res = await axiosClient.post('/ai/interview/start', null, {
-        params: {
-          candidateId,
-          jobRole: activeRole,
-        },
-      });
-
-      setSessionId(res.data.sessionId);
-      setMessages([res.data]);
-      setSessionScore(res.data.score || 100);
+      const data = await aiService.startInterviewSession(user ? user.id : 3, activeRole);
+      setSessionId(data.sessionId);
+      setMessages([data]);
+      setSessionScore(data.score || 100);
     } catch (err) {
       console.error('Failed to start interview session:', err);
     } finally {
@@ -72,17 +66,17 @@ export default function AiInterview() {
     setLoading(true);
 
     try {
-      const candidateId = user ? user.id : 3;
-      const res = await axiosClient.post('/ai/interview/message', {
+      const data = await aiService.sendInterviewMessage({
         sessionId,
-        candidateId,
+        candidateId: user ? user.id : 3,
         jobRole: activeRole,
         message: userText,
+        history: messages,
       });
 
-      setMessages((prev) => [...prev, res.data]);
-      if (res.data.score) {
-        setSessionScore(res.data.score);
+      setMessages((prev) => [...prev, data]);
+      if (data.score) {
+        setSessionScore(data.score);
       }
     } catch (err) {
       console.error('Failed to send interview message:', err);
