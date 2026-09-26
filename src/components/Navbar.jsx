@@ -17,9 +17,9 @@ const Navbar = () => {
     <header className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <span className="logo-icon" style={{ filter: 'drop-shadow(0 2px 4px rgba(37, 99, 235, 0.4))' }}>🌐</span>
-          <span className="logo-text" style={{ background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>
-            HireSphere <span style={{ fontSize: '0.75em', padding: '0.1rem 0.35rem', background: '#2563eb', color: '#fff', borderRadius: '4px', WebkitTextFillColor: '#fff', verticalAlign: 'middle' }}>AI</span>
+          <span className="logo-icon" style={{ filter: 'drop-shadow(0 2px 4px rgba(124, 58, 237, 0.45))' }}>🌐</span>
+          <span className="logo-text" style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>
+            HireSphere <span style={{ fontSize: '0.75em', padding: '0.1rem 0.35rem', background: 'var(--primary, #7c3aed)', color: '#fff', borderRadius: '4px', WebkitTextFillColor: '#fff', verticalAlign: 'middle' }}>AI</span>
           </span>
         </Link>
 
@@ -30,7 +30,7 @@ const Navbar = () => {
           <NavLink to="/jobs" className={getNavLinkClass}>
             Browse Jobs
           </NavLink>
-          <NavLink to="/ai-coach" className={getNavLinkClass} style={{ color: '#2563eb', fontWeight: 600 }}>
+          <NavLink to="/ai-coach" className={getNavLinkClass} style={{ color: 'var(--primary, #7c3aed)', fontWeight: 600 }}>
             🤖 AI Coach
           </NavLink>
 

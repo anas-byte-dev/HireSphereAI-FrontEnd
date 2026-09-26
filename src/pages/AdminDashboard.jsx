@@ -211,7 +211,7 @@ const AdminDashboard = ({ initialTab = 'users' }) => {
               ✨
             </div>
             <div className="stat-details">
-              <span className="stat-number" style={{ fontSize: '1.25rem', color: aiStatus?.active ? '#7c3aed' : '#2563eb' }}>
+              <span className="stat-number" style={{ fontSize: '1.25rem', color: aiStatus?.active ? '#7c3aed' : '#6b7280' }}>
                 {aiStatus?.active ? 'Active' : 'Offline'}
               </span>
               <span className="stat-label" style={{ fontSize: '0.78rem' }}>

@@ -105,7 +105,7 @@ export default function AiConfigModal({ isOpen, onClose }) {
             />
             <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
               💡 Free Gemini API keys can be generated at{' '}
-              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: '#2563eb', fontWeight: 600 }}>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--primary, #7c3aed)', fontWeight: 600 }}>
                 Google AI Studio ↗
               </a>
               . Your key is stored securely in your browser and used directly for live generation.

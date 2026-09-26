@@ -57,7 +57,7 @@ const CandidateDashboard = () => {
 
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb' }}>📄</div>
+          <div className="stat-icon" style={{ background: 'rgba(124, 58, 237, 0.12)', color: 'var(--primary, #7c3aed)' }}>📄</div>
           <div className="stat-details">
             <span className="stat-number">{applications.length}</span>
             <span className="stat-label">Applications Submitted</span>

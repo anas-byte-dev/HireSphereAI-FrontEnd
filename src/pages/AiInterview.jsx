@@ -172,23 +172,23 @@ export default function AiInterview() {
         </div>
       ) : (
         /* Chat Session Chamber */
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="ai-interview-chamber-grid">
           {/* Main Conversation Chamber */}
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '620px', padding: 0, overflow: 'hidden' }}>
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '640px', maxHeight: '82vh', padding: 0, overflow: 'hidden' }}>
             {/* Chamber Topbar */}
             <div
               style={{
                 padding: '0.9rem 1.25rem',
-                background: 'var(--bg-card-header, #f8fafc)',
-                borderBottom: '1px solid var(--border-color, #e2e8f0)',
+                background: 'var(--bg-subtle, #ede7f8)',
+                borderBottom: '1px solid var(--border-color, #e4dcf4)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
             >
               <div>
-                <strong style={{ fontSize: '1rem' }}>Role: {activeRole}</strong>
-                <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '0.75rem' }}>
+                <strong style={{ fontSize: '1rem', color: 'var(--text-main, #1e1b4b)' }}>Role: {activeRole}</strong>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-light, #6b7280)', marginLeft: '0.75rem' }}>
                   Session #{sessionId.slice(0, 8)}
                 </span>
               </div>
@@ -219,19 +219,23 @@ export default function AiInterview() {
                   <div
                     style={{
                       maxWidth: '82%',
-                      padding: '0.85rem 1.1rem',
-                      borderRadius: '12px',
+                      padding: '0.9rem 1.15rem',
+                      borderRadius: '14px',
                       background:
                         msg.sender === 'CANDIDATE'
-                          ? 'var(--primary-color, #2563eb)'
-                          : 'var(--bg-secondary, #f1f5f9)',
-                      color: msg.sender === 'CANDIDATE' ? '#ffffff' : 'var(--text-primary, #0f172a)',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                          ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                          : '#ffffff',
+                      border:
+                        msg.sender === 'CANDIDATE'
+                          ? '1px solid #6d28d9'
+                          : '1.5px solid var(--border-color, #e4dcf4)',
+                      color: msg.sender === 'CANDIDATE' ? '#ffffff' : 'var(--text-main, #1e1b4b)',
+                      boxShadow: '0 2px 10px rgba(124, 58, 237, 0.08)',
                       lineHeight: 1.5,
                       fontSize: '0.95rem',
                     }}
                   >
-                    <div style={{ fontSize: '0.72rem', opacity: 0.8, marginBottom: '0.3rem', fontWeight: 600 }}>
+                    <div style={{ fontSize: '0.74rem', opacity: msg.sender === 'CANDIDATE' ? 0.9 : 0.75, marginBottom: '0.35rem', fontWeight: 700 }}>
                       {msg.sender === 'CANDIDATE' ? 'You (Candidate)' : '🤖 HireSphere AI Interviewer'}
                     </div>
                     <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.6 }}>
@@ -243,14 +247,16 @@ export default function AiInterview() {
                   {msg.sender === 'AI' && msg.feedback && (
                     <div
                       style={{
-                        marginTop: '0.4rem',
+                        marginTop: '0.45rem',
                         maxWidth: '82%',
-                        padding: '0.5rem 0.8rem',
-                        borderRadius: '8px',
-                        background: 'rgba(245, 158, 11, 0.1)',
-                        borderLeft: '3px solid #f59e0b',
-                        fontSize: '0.82rem',
+                        padding: '0.6rem 0.9rem',
+                        borderRadius: '10px',
+                        background: 'rgba(217, 119, 6, 0.08)',
+                        border: '1px solid rgba(217, 119, 6, 0.25)',
+                        borderLeft: '4px solid #d97706',
+                        fontSize: '0.84rem',
                         color: '#92400e',
+                        lineHeight: 1.5,
                       }}
                     >
                       💡 <strong>Coach Feedback:</strong> {msg.feedback}
@@ -265,10 +271,11 @@ export default function AiInterview() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.6rem',
-                    color: 'var(--primary-color, #2563eb)',
+                    color: 'var(--primary, #7c3aed)',
                     fontSize: '0.85rem',
                     fontWeight: 500,
-                    background: 'rgba(37, 99, 235, 0.08)',
+                    background: 'var(--primary-light, #f3e8ff)',
+                    border: '1px solid var(--primary-border, #d8b4fe)',
                     padding: '0.55rem 0.9rem',
                     borderRadius: '8px',
                     width: 'fit-content',
@@ -336,7 +343,7 @@ export default function AiInterview() {
             <div className="card" style={{ padding: '1.25rem' }}>
               <h4 style={{ margin: '0 0 0.75rem' }}>Performance Score</h4>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary-color, #2563eb)' }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary, #7c3aed)' }}>
                   {sessionScore}
                 </span>
                 <span style={{ color: '#64748b', fontSize: '1rem' }}>/ 100</span>
