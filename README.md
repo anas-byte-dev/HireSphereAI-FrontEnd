@@ -4,7 +4,6 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-3.1_Flash_Lite-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
-[![Deployment](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://hire-sphere-ai-front-end.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 HireSphere AI is an intelligent recruitment, placement, and mock interview preparation SPA. Powered by **React 19**, **Vite 8**, **Server-Sent Events (SSE)**, and **Google Gemini AI**, it delivers instantaneous multi-turn technical interview coaching, automated candidate screening, and real-time hiring pipeline synchronization.
@@ -15,10 +14,10 @@ HireSphere AI is an intelligent recruitment, placement, and mock interview prepa
 
 | Service | Environment / Host | Endpoint URL | Description |
 | :--- | :--- | :--- | :--- |
-| **Frontend Web App** | Vercel Edge CDN | **[https://hire-sphere-ai-front-end.vercel.app](https://hire-sphere-ai-front-end.vercel.app)** | Production Single Page Application |
-| **Backend REST API** | Cloud Container | **[https://hiresphereai.onrender.com/api](https://hiresphereai.onrender.com/api)** | Primary Spring Boot API Gateway |
-| **Real-Time Event Stream** | Server-Sent Events (SSE) | **[https://hiresphereai.onrender.com/api/realtime/stream](https://hiresphereai.onrender.com/api/realtime/stream)** | Persistent unidirectional event bus |
-| **Interactive API Docs** | Swagger UI | **[https://hiresphereai.onrender.com/swagger-ui.html](https://hiresphereai.onrender.com/swagger-ui.html)** | Interactive REST testing console |
+| **Frontend Web App** | Edge CDN | `https://<your-frontend-domain>.vercel.app` | Production Single Page Application |
+| **Backend REST API** | Cloud Container | `https://<your-backend-domain>.onrender.com/api` | Primary Spring Boot API Gateway |
+| **Real-Time Event Stream** | Server-Sent Events (SSE) | `https://<your-backend-domain>.onrender.com/api/realtime/stream` | Persistent unidirectional event bus |
+| **Interactive API Docs** | Swagger UI | `https://<your-backend-domain>.onrender.com/swagger-ui.html` | Interactive REST testing console |
 
 ---
 
@@ -67,7 +66,7 @@ frontend/
 │   │   └── applicationService.js # Application submission & review services
 │   ├── App.jsx             # React Router routing topology
 │   └── main.jsx            # React root mount
-├── .env.example            # Environment template (NO SECRETS)
+├── .env.example            # Environment template (Zero secrets)
 ├── package.json
 └── vite.config.js          # Vite build configuration & local dev proxy
 ```
@@ -87,10 +86,10 @@ VITE_BACKEND_PORT=8085
 
 # Centralized API & Real-Time Endpoints
 # Production:
-VITE_API_BASE_URL=https://hiresphereai.onrender.com/api
-VITE_REALTIME_STREAM_URL=https://hiresphereai.onrender.com/api/realtime/stream
-VITE_SWAGGER_URL=https://hiresphereai.onrender.com/swagger-ui.html
-VITE_H2_CONSOLE_URL=https://hiresphereai.onrender.com/h2-console
+VITE_API_BASE_URL=https://<your-backend-domain>.onrender.com/api
+VITE_REALTIME_STREAM_URL=https://<your-backend-domain>.onrender.com/api/realtime/stream
+VITE_SWAGGER_URL=https://<your-backend-domain>.onrender.com/swagger-ui.html
+VITE_H2_CONSOLE_URL=https://<your-backend-domain>.onrender.com/h2-console
 
 # Local Development:
 # VITE_API_BASE_URL=http://localhost:8085/api
@@ -117,7 +116,7 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ### Installation & Run
 ```bash
 # 1. Clone repository
-git clone https://github.com/anas-byte-dev/HireSphereAI-FrontEnd.git
+git clone https://github.com/<your-username>/HireSphereAI-FrontEnd.git
 cd HireSphereAI-FrontEnd
 
 # 2. Install dependencies
@@ -142,7 +141,7 @@ npm run preview
 
 ## 🔑 Demo Test Accounts
 
-The platform includes demo accounts for local and staging evaluation:
+The platform includes demo accounts for evaluation:
 
 | Role | Email | Password | Pre-loaded Context |
 | :--- | :--- | :--- | :--- |
