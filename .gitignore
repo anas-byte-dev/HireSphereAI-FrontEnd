@@ -28,3 +28,8 @@ dist-ssr
 .env.exapmle
 *.env
 hiresphere_realtime_db.mv.db
+PROJECT_MASTERY_INTERVIEW_GUIDE/
+*private*
+*PRIVATE*
+SRS_DOCUMENT.md
+ARCHITECTURE_AND_WORKFLOW.md
