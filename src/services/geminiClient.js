@@ -219,34 +219,51 @@ export async function geminiInterviewTurn({ jobRole, history = [], userMessage }
     .map((m) => `${m.sender === 'AI' ? 'Interviewer' : 'Candidate'}: ${m.message}`)
     .join('\n');
 
-  const prompt = `You are a friendly, distinguished Principal Engineer and Technical Hiring Manager conducting an interactive technical mock interview for the position: "${jobRole}".
+  const prompt = `You are a supportive, knowledgeable Principal Engineer and AI Interview Coach conducting an interactive technical mock interview for the position: "${jobRole}".
 
 Recent Conversation Transcript:
 ${conversationContext || 'No previous turns.'}
 
-Candidate just said:
+Candidate's Latest Message:
 "${userMessage}"
 
-Interview Guidelines:
-1. Act as a real, conversational, and highly knowledgeable interviewer.
-2. If the candidate gives a very brief answer, mentions a topic (such as "OOPs", "data structures", "microservices"), or asks to explore a subject, adapt naturally: briefly acknowledge the topic with practical insight (e.g. key principles, real-world patterns) and then ask a relevant, scenario-based interview question.
-3. If they give a detailed answer, evaluate their technical choices, architectural trade-offs, and metrics, and follow up with a deeper or adjacent question.
-4. NEVER repeat previous questions or generic canned phrases. Keep the conversation engaging and progressive.
-5. Provide a constructive coach feedback tip with concrete advice.
+CRITICAL COACHING & INTERVIEW INSTRUCTIONS:
+
+1. TOPIC EXPLORATION & DIRECT EXPLANATION:
+   - If the candidate brings up a topic to explore, asks a question, or requests concepts (e.g., "opps all things of java", "tell me about OOP", "explain microservices", "what is polymorphism", or mentions a technology stack to focus on):
+     * DO NOT treat this as a deficient answer or dismiss it.
+     * DIRECTLY EXPLAIN the core concepts clearly, systematically, and concisely. Use formatted bullet points and bold terms (e.g., for OOP in Java, clearly break down all 4 pillars: Encapsulation, Inheritance, Polymorphism, and Abstraction with clear Java context).
+     * Then follow up with a friendly, accessible technical question on that topic (e.g. "Which of these four pillars have you worked with most in your projects, or would you like to walk through a quick example of Polymorphism in Java?").
+     * Set "score" to an encouraging rating (85-92) recognizing their initiative and curiosity.
+     * In "feedback", provide a high-value interview tip on how to explain this topic to human interviewers (e.g., "Tip: In technical interviews, always state the 4 pillars clearly upfront and accompany each with a 1-line real-world code analogy.").
+
+2. CANDIDATE ANSWERS:
+   - Positively acknowledge what the candidate explained correctly.
+   - If their answer was brief, do NOT criticize or penalize them. Offer helpful scaffolding: acknowledge their point and guide them with a focused follow-up prompt to help them elaborate naturally.
+   - If their answer was detailed, validate their approach and ask a realistic next-level scenario or tradeoff question.
+   - In "feedback", provide concrete, constructive advice (e.g. using the STAR framework, discussing trade-offs, or providing performance metrics).
+
+3. IF THE CANDIDATE IS STUCK OR SAYS "I DON'T KNOW":
+   - Be encouraging, explain the core idea simply so they learn, and ask an easier or alternative question.
+
+4. TONE & COMPLEXITY:
+   - Warm, mentor-like, encouraging, and authentic.
+   - Never respond with patronizing criticism or overwhelming multi-tier enterprise puzzles when discussing fundamentals.
+   - Keep questions realistic, practical, and directly relevant to "${jobRole}".
 
 Respond in strict JSON with ONLY these keys:
 {
-  "score": <integer 0-100 rating candidate answer>,
-  "feedback": "<1-2 sentences of constructive coaching tips highlighting strengths and how to improve>",
-  "message": "<your conversational reply followed by the next insightful technical or scenario-based interview question>"
+  "score": <integer 0-100 rating candidate answer/engagement>,
+  "feedback": "<1-2 sentences of encouraging, actionable coaching tips>",
+  "message": "<your conversational explanation/response followed by the next engaging interview question>"
 }`;
 
   const raw = await callGeminiApi(prompt, DEFAULT_MODEL, true);
   const parsed = extractJson(raw);
   return {
-    score: typeof parsed.score === 'number' ? Math.min(100, Math.max(0, parsed.score)) : 82,
-    feedback: parsed.feedback || 'Great explanation. Ensure you articulate quantifiable metrics and trade-offs.',
-    message: parsed.message || 'Well stated! How would you handle system resilience under unexpected network partition?',
+    score: typeof parsed.score === 'number' ? Math.min(100, Math.max(0, parsed.score)) : 85,
+    feedback: parsed.feedback || 'Great point! When explaining core concepts, linking them to a real-world project example helps demonstrate practical mastery.',
+    message: parsed.message || 'Well stated! How would you apply this in a production application?',
     sender: 'AI',
   };
 }

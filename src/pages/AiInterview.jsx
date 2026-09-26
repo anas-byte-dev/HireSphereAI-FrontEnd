@@ -234,7 +234,9 @@ export default function AiInterview() {
                     <div style={{ fontSize: '0.72rem', opacity: 0.8, marginBottom: '0.3rem', fontWeight: 600 }}>
                       {msg.sender === 'CANDIDATE' ? 'You (Candidate)' : '🤖 HireSphere AI Interviewer'}
                     </div>
-                    <div>{msg.message}</div>
+                    <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.6 }}>
+                      {msg.message}
+                    </div>
                   </div>
 
                   {/* AI Feedback Card */}

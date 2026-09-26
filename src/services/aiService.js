@@ -203,11 +203,20 @@ const aiService = {
     let dynamicMessage = '';
     let dynamicFeedback = '';
 
-    if (lower.includes('oop') || lower.includes('object oriented')) {
-      dynamicMessage = 'Object-Oriented Programming provides essential structure for maintainable code. How do you decide between Class Inheritance versus Interface Composition when designing a scalable component?';
-      dynamicFeedback = 'Good focus on OOP principles. Remember to provide concrete code structure examples and trade-offs.';
+    const isTopicQuery = lower.includes('oop') || lower.includes('object oriented') || lower.includes('java') || lower.includes('what is') || lower.includes('explain') || lower.includes('tell me');
+
+    if (lower.includes('oop') || lower.includes('object oriented') || (lower.includes('java') && (lower.includes('all') || lower.includes('thing') || lower.includes('concept')))) {
+      dynamicMessage = `Object-Oriented Programming (OOP) in Java is built upon four fundamental pillars:
+
+1. **Encapsulation**: Bundling data (fields) and methods into a single class while keeping fields private and providing public getters and setters to protect internal state.
+2. **Inheritance**: Allowing a child class to inherit fields and methods from a parent class using the \`extends\` keyword to promote code reuse.
+3. **Polymorphism**: The ability for an action to behave differently depending on the context—either compile-time (method overloading) or runtime (method overriding using dynamic method dispatch).
+4. **Abstraction**: Hiding internal implementation complexity and exposing only essential interfaces using \`abstract\` classes and \`interface\` contracts.
+
+Which of these four pillars have you worked with most in your projects, or would you like to walk through a quick example of Polymorphism in Java?`;
+      dynamicFeedback = 'Tip: When asked about OOP in Java interviews, always state all 4 pillars clearly upfront and give a quick 1-line real-world code analogy for each.';
     } else if (lower.includes('database') || lower.includes('sql') || lower.includes('query')) {
-      dynamicMessage = 'Data layer efficiency is vital in production. How would you diagnose and optimize a slow query causing connection pool exhaustion under heavy traffic?';
+      dynamicMessage = 'Data layer design and query efficiency are critical in production systems. How do you approach indexing strategies and query optimization when dealing with high read-write throughput?';
       dynamicFeedback = 'Strong direction on data management. Quantify performance metrics like p99 latency where possible.';
     } else if (turnCount === 1) {
       dynamicMessage = `Great context! Let's explore your core technical depth for ${jobRole}: Can you walk me through the key architectural layers of your most impactful system and the biggest technical tradeoff you made?`;
@@ -231,10 +240,12 @@ const aiService = {
       jobRole,
       sender: 'AI',
       message: dynamicMessage,
-      feedback: wordCount < 10
+      feedback: isTopicQuery
+        ? dynamicFeedback
+        : wordCount < 10
         ? `Your answer was very concise. ${dynamicFeedback}`
         : dynamicFeedback,
-      score: Math.min(95, Math.max(68, 65 + wordCount * 2)),
+      score: isTopicQuery ? 88 : Math.min(95, Math.max(68, 65 + wordCount * 2)),
       timestamp: new Date().toISOString(),
       generatedBy: 'Autonomous Engine',
     };
