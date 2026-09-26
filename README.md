@@ -11,15 +11,14 @@ HireSphere AI is an intelligent recruitment, placement, and mock interview prepa
 
 ---
 
-## 🌐 Live Production Endpoints
+## 🌐 Deployment Endpoints
 
 | Service | Environment / Host | Endpoint URL | Description |
 | :--- | :--- | :--- | :--- |
-| **Frontend Web App** | Vercel Edge CDN | **[https://hire-sphere-ai-front-end.vercel.app](https://hire-sphere-ai-front-end.vercel.app)** | Live production Single Page Application |
-| **Backend REST API** | Render Cloud Container | **[https://hiresphereai.onrender.com/api](https://hiresphereai.onrender.com/api)** | Primary Spring Boot API Gateway |
+| **Frontend Web App** | Vercel Edge CDN | **[https://hire-sphere-ai-front-end.vercel.app](https://hire-sphere-ai-front-end.vercel.app)** | Production Single Page Application |
+| **Backend REST API** | Cloud Container | **[https://hiresphereai.onrender.com/api](https://hiresphereai.onrender.com/api)** | Primary Spring Boot API Gateway |
 | **Real-Time Event Stream** | Server-Sent Events (SSE) | **[https://hiresphereai.onrender.com/api/realtime/stream](https://hiresphereai.onrender.com/api/realtime/stream)** | Persistent unidirectional event bus |
-| **Interactive API Docs** | Springdoc Swagger UI | **[https://hiresphereai.onrender.com/swagger-ui.html](https://hiresphereai.onrender.com/swagger-ui.html)** | Interactive REST testing console |
-| **Embedded DB Console** | H2 Web Console | **[https://hiresphereai.onrender.com/h2-console](https://hiresphereai.onrender.com/h2-console)** | Direct SQL database inspector |
+| **Interactive API Docs** | Swagger UI | **[https://hiresphereai.onrender.com/swagger-ui.html](https://hiresphereai.onrender.com/swagger-ui.html)** | Interactive REST testing console |
 
 ---
 
@@ -68,17 +67,16 @@ frontend/
 │   │   └── applicationService.js # Application submission & review services
 │   ├── App.jsx             # React Router routing topology
 │   └── main.jsx            # React root mount
-├── .env                    # Production & local environment variables
-├── .env.example            # Environment template
+├── .env.example            # Environment template (NO SECRETS)
 ├── package.json
 └── vite.config.js          # Vite build configuration & local dev proxy
 ```
 
 ---
 
-## ⚙️ Environment Configuration (`.env`)
+## ⚙️ Environment Configuration (`.env.example`)
 
-Create a `.env` file in the root of the `frontend` directory:
+Create a `.env` file in the root of the `frontend` directory using the template below:
 
 ```env
 # Application Brand & Ports
@@ -88,13 +86,13 @@ VITE_PORT=5175
 VITE_BACKEND_PORT=8085
 
 # Centralized API & Real-Time Endpoints
-# For production:
+# Production:
 VITE_API_BASE_URL=https://hiresphereai.onrender.com/api
 VITE_REALTIME_STREAM_URL=https://hiresphereai.onrender.com/api/realtime/stream
 VITE_SWAGGER_URL=https://hiresphereai.onrender.com/swagger-ui.html
 VITE_H2_CONSOLE_URL=https://hiresphereai.onrender.com/h2-console
 
-# For local backend:
+# Local Development:
 # VITE_API_BASE_URL=http://localhost:8085/api
 # VITE_REALTIME_STREAM_URL=http://localhost:8085/api/realtime/stream
 
@@ -104,8 +102,8 @@ VITE_ENABLE_AI_MOCK_INTERVIEW=true
 VITE_ENABLE_AI_CANDIDATE_SCREENING=true
 VITE_ENABLE_AI_JOB_GENERATOR=true
 
-# Google Gemini AI (Optional Client-Side Key for Ultra-Fast Inference)
-VITE_GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+# Google Gemini AI (Optional client-side key for direct LLM inference)
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ---
@@ -133,7 +131,7 @@ The application will be running at **`http://localhost:5175`**.
 
 ### Production Build
 ```bash
-# Verify type/bundle integrity and build production assets
+# Verify bundle integrity and build production assets
 npm run build
 
 # Preview production build locally
@@ -144,13 +142,13 @@ npm run preview
 
 ## 🔑 Demo Test Accounts
 
-The platform comes pre-seeded with test accounts across all roles:
+The platform includes demo accounts for local and staging evaluation:
 
 | Role | Email | Password | Pre-loaded Context |
 | :--- | :--- | :--- | :--- |
-| **Candidate** | `alice@example.com` | `candidate123` | Full-Stack profile, active applications |
-| **Recruiter** | `recruiter@techcorp.com` | `recruiter123` | TechCorp HR director, published job listings |
-| **Admin** | `admin@hiresphere.ai` | `admin123` | Full administrative oversight |
+| **Candidate** | `candidate@example.com` | `candidate123` | Full-Stack profile, active applications |
+| **Recruiter** | `recruiter@example.com` | `recruiter123` | HR director, published job listings |
+| **Admin** | `admin@example.com` | `admin123` | Administrative oversight |
 
 ---
 
