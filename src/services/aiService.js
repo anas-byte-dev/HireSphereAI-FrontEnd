@@ -203,9 +203,17 @@ const aiService = {
     let dynamicMessage = '';
     let dynamicFeedback = '';
 
-    const isTopicQuery = lower.includes('oop') || lower.includes('object oriented') || lower.includes('java') || lower.includes('what is') || lower.includes('explain') || lower.includes('tell me');
+    const isHelpQuery = lower.includes("don't know") || lower.includes("dont know") || lower.includes('idk') || lower.includes('not sure') || lower.includes('hint') || lower.includes('help me') || lower.includes('skip');
+    const isTopicQuery = isHelpQuery || lower.includes('oop') || lower.includes('object oriented') || lower.includes('java') || lower.includes('thread') || lower.includes('concurrency') || lower.includes('collection') || lower.includes('hashmap') || lower.includes('spring') || lower.includes('rest') || lower.includes('microservice') || lower.includes('database') || lower.includes('sql') || lower.includes('react') || lower.includes('what is') || lower.includes('explain') || lower.includes('tell me');
 
-    if (lower.includes('oop') || lower.includes('object oriented') || (lower.includes('java') && (lower.includes('all') || lower.includes('thing') || lower.includes('concept')))) {
+    if (isHelpQuery) {
+      dynamicMessage = `No worries at all! That is completely normal—interviews are collaborative learning conversations.
+
+When you encounter an unfamiliar concept in a real interview, the best approach is to talk through what you do know or share how you would research and diagnose it.
+
+Let's reset and explore from a practical angle: Could you tell me about a feature or project you enjoyed building recently, and what role your core programming language played in it?`;
+      dynamicFeedback = 'Tip: When stuck, think out loud! Interviewers award huge credit for demonstrating clear problem-solving reasoning even if you don’t recall every syntax detail.';
+    } else if (lower.includes('oop') || lower.includes('object oriented') || (lower.includes('java') && (lower.includes('all') || lower.includes('thing') || lower.includes('concept')))) {
       dynamicMessage = `Object-Oriented Programming (OOP) in Java is built upon four fundamental pillars:
 
 1. **Encapsulation**: Bundling data (fields) and methods into a single class while keeping fields private and providing public getters and setters to protect internal state.
@@ -215,7 +223,56 @@ const aiService = {
 
 Which of these four pillars have you worked with most in your projects, or would you like to walk through a quick example of Polymorphism in Java?`;
       dynamicFeedback = 'Tip: When asked about OOP in Java interviews, always state all 4 pillars clearly upfront and give a quick 1-line real-world code analogy for each.';
-    } else if (lower.includes('database') || lower.includes('sql') || lower.includes('query')) {
+    } else if (lower.includes('thread') || lower.includes('concurrency') || lower.includes('synchroniz') || lower.includes('multithread')) {
+      dynamicMessage = `Multithreading and Concurrency in Java allow applications to execute multiple tasks simultaneously to maximize CPU utilization:
+
+1. **Thread Creation**: Extending \`Thread\` or implementing \`Runnable\` / \`Callable\`.
+2. **Synchronization**: Using \`synchronized\` methods or blocks to prevent race conditions when multiple threads access shared mutable state.
+3. **Volatile Keyword**: Ensuring variable visibility across threads directly from main memory.
+4. **Concurrency Utilities**: Modern Java uses \`ExecutorService\`, \`CompletableFuture\`, and concurrent collections like \`ConcurrentHashMap\` rather than manual thread management.
+
+Have you worked with thread safety, synchronization, or thread pools like \`ExecutorService\` in any of your applications?`;
+      dynamicFeedback = 'Tip: In concurrency questions, always emphasize thread safety, race conditions, and why modern systems favor thread pools over creating raw threads.';
+    } else if (lower.includes('collection') || lower.includes('hashmap') || lower.includes('arraylist') || lower.includes('list') || lower.includes('map')) {
+      dynamicMessage = `The Java Collections Framework provides standardized data structures for managing groups of objects:
+
+1. **List (e.g. ArrayList vs LinkedList)**: Ordered collections with index-based access. ArrayList provides O(1) random access, while LinkedList provides efficient insertions at extremities.
+2. **Set (e.g. HashSet, TreeSet)**: Collections that guarantee uniqueness without duplicate elements.
+3. **Map (e.g. HashMap, ConcurrentHashMap)**: Key-value pairs. HashMap computes hash codes to map keys to buckets in O(1) average time, handling collisions via linked lists and red-black trees.
+
+How do you decide between an ArrayList and a LinkedList, or how would you handle hash collisions in a custom Map?`;
+      dynamicFeedback = 'Tip: Memorize time complexity (O(1) lookup for HashMap, O(n) worst-case collision) and discuss how Java 8+ converts high-collision buckets into red-black trees.';
+    } else if (lower.includes('spring') || lower.includes('boot') || lower.includes('dependency injection') || lower.includes('ioc')) {
+      dynamicMessage = `Spring Boot simplifies enterprise Java development through conventions and dependency management:
+
+1. **Inversion of Control (IoC)**: The Spring IoC container manages the lifecycle, configuration, and assembly of objects (Beans).
+2. **Dependency Injection (DI)**: Components declare dependencies (via constructor or field injection) rather than instantiating them directly.
+3. **Auto-Configuration**: \`@SpringBootApplication\` automatically configures beans based on classpath dependencies.
+4. **REST Controllers**: \`@RestController\` combines \`@Controller\` and \`@ResponseBody\` for JSON APIs.
+
+Why is constructor-based dependency injection generally preferred over field injection with \`@Autowired\` in modern Spring applications?`;
+      dynamicFeedback = 'Tip: Emphasize that constructor injection enables immutability (final fields), easier unit testing with mock objects, and prevents hidden circular dependencies.';
+    } else if (lower.includes('rest') || lower.includes('api') || lower.includes('microservice') || lower.includes('http')) {
+      dynamicMessage = `RESTful Architecture defines stateless, standard communication between clients and web services:
+
+1. **HTTP Verbs**: GET (fetch), POST (create), PUT (replace), PATCH (partial update), DELETE (remove).
+2. **Status Codes**: 200 (OK), 201 (Created), 400 (Bad Request), 401/403 (Auth), 404 (Not Found), 500 (Server Error).
+3. **Statelessness**: Every request contains all necessary context; servers do not store client session states.
+4. **Idempotency**: GET, PUT, and DELETE operations yield the same result when called multiple times.
+
+How do you ensure idempotency for critical endpoints (like payment or checkout processing), or how do you structure API versioning?`;
+      dynamicFeedback = 'Tip: Highlighting idempotency keys and clear HTTP status codes shows strong real-world backend engineering maturity.';
+    } else if (lower.includes('react') || lower.includes('hook') || lower.includes('state') || lower.includes('frontend')) {
+      dynamicMessage = `React applications rely on component-based architecture and declarative state management:
+
+1. **Component State**: \`useState\` for local component state, \`useReducer\` for complex state transitions.
+2. **Side Effects**: \`useEffect\` handles data fetching, subscriptions, and lifecycle cleanup.
+3. **Virtual DOM**: React computes diffs in memory to minimize expensive real DOM manipulations.
+4. **Performance**: \`useMemo\`, \`useCallback\`, and \`React.memo\` prevent unnecessary re-renders.
+
+How do you optimize rendering performance in a React application when dealing with large lists or frequent state updates?`;
+      dynamicFeedback = 'Tip: Mention virtualization (e.g. react-window), memoization of expensive computations, and avoiding anonymous inline functions in render loops.';
+    } else if (lower.includes('database') || lower.includes('sql') || lower.includes('query') || lower.includes('index')) {
       dynamicMessage = 'Data layer design and query efficiency are critical in production systems. How do you approach indexing strategies and query optimization when dealing with high read-write throughput?';
       dynamicFeedback = 'Strong direction on data management. Quantify performance metrics like p99 latency where possible.';
     } else if (turnCount === 1) {
