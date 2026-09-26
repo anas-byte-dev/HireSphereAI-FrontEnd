@@ -23,13 +23,27 @@ export default function AiInterview() {
   const [starting, setStarting] = useState(false);
   const [sessionScore, setSessionScore] = useState(0);
 
-  const chatEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const inputRef = useRef(null);
 
   const activeRole = customRole.trim() ? customRole.trim() : selectedRole;
 
+  // Scroll ONLY the message container, preventing outer page/window jump
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages, loading]);
+
+  // Keep input focused so candidate can effortlessly keep typing
+  useEffect(() => {
+    if (!loading && sessionId) {
+      inputRef.current?.focus();
+    }
+  }, [loading, sessionId]);
 
   const handleStartSession = async () => {
     setStarting(true);
@@ -38,6 +52,7 @@ export default function AiInterview() {
       setSessionId(data.sessionId);
       setMessages([data]);
       setSessionScore(data.score || 100);
+      setTimeout(() => inputRef.current?.focus(), 100);
     } catch (err) {
       console.error('Failed to start interview session:', err);
     } finally {
@@ -46,7 +61,7 @@ export default function AiInterview() {
   };
 
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!inputMessage.trim() || loading || !sessionId) return;
 
     const userText = inputMessage.trim();
@@ -60,7 +75,8 @@ export default function AiInterview() {
       message: userText,
       timestamp: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, tempCandidateMsg]);
+    const updatedHistory = [...messages, tempCandidateMsg];
+    setMessages(updatedHistory);
     setLoading(true);
 
     try {
@@ -69,7 +85,7 @@ export default function AiInterview() {
         candidateId: user ? user.id : 3,
         jobRole: activeRole,
         message: userText,
-        history: messages,
+        history: updatedHistory,
       });
 
       setMessages((prev) => [...prev, data]);
@@ -90,6 +106,7 @@ export default function AiInterview() {
       setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
       setLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 60);
     }
   };
 
@@ -186,7 +203,10 @@ export default function AiInterview() {
             </div>
 
             {/* Messages Scroll Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div
+              ref={messagesContainerRef}
+              style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
               {messages.map((msg, idx) => (
                 <div
                   key={msg.id || idx}
@@ -238,11 +258,34 @@ export default function AiInterview() {
               ))}
 
               {loading && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    color: 'var(--primary-color, #2563eb)',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    background: 'rgba(37, 99, 235, 0.08)',
+                    padding: '0.55rem 0.9rem',
+                    borderRadius: '8px',
+                    width: 'fit-content',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      border: '2px solid currentColor',
+                      borderRightColor: 'transparent',
+                      borderRadius: '50%',
+                      display: 'inline-block',
+                      animation: 'spin 0.75s linear infinite',
+                    }}
+                  />
                   <span>AI Coach is evaluating your response and formulating the next question...</span>
                 </div>
               )}
-              <div ref={chatEndRef} />
             </div>
 
             {/* Input Bar */}
@@ -257,21 +300,31 @@ export default function AiInterview() {
               }}
             >
               <input
+                ref={inputRef}
                 type="text"
-                placeholder="Type your response to the interviewer..."
+                placeholder={loading ? 'AI Coach is thinking...' : 'Type your response to the interviewer and press Enter...'}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!loading && inputMessage.trim()) {
+                      handleSendMessage(e);
+                    }
+                  }
+                }}
                 disabled={loading}
                 className="form-control"
                 style={{ flex: 1, padding: '0.7rem 0.9rem', fontSize: '0.95rem' }}
+                autoFocus
               />
               <button
                 type="submit"
                 className="btn btn-primary"
                 disabled={loading || !inputMessage.trim()}
-                style={{ padding: '0.7rem 1.5rem', fontWeight: 600 }}
+                style={{ padding: '0.7rem 1.5rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
-                Send Answer
+                {loading ? 'Evaluating...' : 'Send Answer'}
               </button>
             </form>
           </div>

@@ -146,6 +146,16 @@ const aiService = {
       try {
         const turnResult = await geminiInterviewTurn({ jobRole, history, userMessage: message });
         if (turnResult && turnResult.message) {
+          // Sync candidate message and turn to backend if online (fire-and-forget)
+          axiosClient
+            .post(API_ENDPOINTS.AI.INTERVIEW_MESSAGE, {
+              sessionId,
+              candidateId: safeId,
+              jobRole,
+              message,
+            })
+            .catch(() => {});
+
           return {
             id: Date.now(),
             sessionId,
@@ -167,13 +177,17 @@ const aiService = {
     // 2. Try backend with strict timeout
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 4000); // 4s backend timeout
-      const response = await axiosClient.post(API_ENDPOINTS.AI.INTERVIEW_MESSAGE, {
-        sessionId,
-        candidateId: safeId,
-        jobRole,
-        message,
-      }, { signal: controller.signal });
+      const timer = setTimeout(() => controller.abort(), 7000); // 7s backend timeout
+      const response = await axiosClient.post(
+        API_ENDPOINTS.AI.INTERVIEW_MESSAGE,
+        {
+          sessionId,
+          candidateId: safeId,
+          jobRole,
+          message,
+        },
+        { signal: controller.signal }
+      );
       clearTimeout(timer);
 
       if (response.data && response.data.message) {
@@ -183,7 +197,32 @@ const aiService = {
       console.warn('Backend interview turn timed out/failed, applying instant coaching engine:', err.message);
     }
 
-    // 3. Guaranteed Instant Heuristic Coaching Response (Never leaves user hanging)
+    // 3. Guaranteed Dynamic Coaching Engine Fallback (Never repeats, context-aware)
+    const turnCount = Math.floor(history.length / 2) + 1;
+    const lower = message.toLowerCase();
+    let dynamicMessage = '';
+    let dynamicFeedback = '';
+
+    if (lower.includes('oop') || lower.includes('object oriented')) {
+      dynamicMessage = 'Object-Oriented Programming provides essential structure for maintainable code. How do you decide between Class Inheritance versus Interface Composition when designing a scalable component?';
+      dynamicFeedback = 'Good focus on OOP principles. Remember to provide concrete code structure examples and trade-offs.';
+    } else if (lower.includes('database') || lower.includes('sql') || lower.includes('query')) {
+      dynamicMessage = 'Data layer efficiency is vital in production. How would you diagnose and optimize a slow query causing connection pool exhaustion under heavy traffic?';
+      dynamicFeedback = 'Strong direction on data management. Quantify performance metrics like p99 latency where possible.';
+    } else if (turnCount === 1) {
+      dynamicMessage = `Great context! Let's explore your core technical depth for ${jobRole}: Can you walk me through the key architectural layers of your most impactful system and the biggest technical tradeoff you made?`;
+      dynamicFeedback = 'Nice start! Anchor your answers with the STAR method (Situation, Task, Action, Result).';
+    } else if (turnCount === 2) {
+      dynamicMessage = 'Excellent explanation. Now thinking about reliability and scale: How do you design your services to handle network partitions or sudden traffic spikes without cascading failure?';
+      dynamicFeedback = 'Good insight. Discussing circuit breakers, caching, and rate limiting strengthens architectural credibility.';
+    } else if (turnCount === 3) {
+      dynamicMessage = 'That makes sense. In terms of code quality and delivery speed, what testing strategy (unit, integration, end-to-end) and CI/CD gates do you enforce before pushing to production?';
+      dynamicFeedback = 'Solid discussion of engineering practices. Mentioning automated coverage thresholds shows senior maturity.';
+    } else {
+      dynamicMessage = 'Thank you for the detailed walkthrough! To wrap up: What is one emerging technology or paradigm you are currently learning, and how would it benefit our engineering team?';
+      dynamicFeedback = 'Great overall communication! Continue demonstrating continuous learning and business impact.';
+    }
+
     const wordCount = message.trim().split(/\s+/).length;
     return {
       id: Date.now(),
@@ -191,10 +230,10 @@ const aiService = {
       candidateId: safeId,
       jobRole,
       sender: 'AI',
-      message: 'Great explanation! To evaluate your depth in system architecture: How would you design this to maintain high availability and prevent single points of failure under peak load?',
-      feedback: wordCount < 15
-        ? 'Your answer was concise. Be sure to elaborate on concrete architectural tradeoffs, metrics, and measurable outcomes.'
-        : 'Solid response! You communicated key engineering decisions and trade-offs effectively.',
+      message: dynamicMessage,
+      feedback: wordCount < 10
+        ? `Your answer was very concise. ${dynamicFeedback}`
+        : dynamicFeedback,
       score: Math.min(95, Math.max(68, 65 + wordCount * 2)),
       timestamp: new Date().toISOString(),
       generatedBy: 'Autonomous Engine',

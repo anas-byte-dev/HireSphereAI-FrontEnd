@@ -5,15 +5,16 @@
  */
 
 const FALLBACK_GEMINI_KEY = typeof atob !== 'undefined'
-  ? atob('QVEuQWI4Uk42SWwtY2ItWWNTRFdRV09vcGEtck5XNktHa3lzdDNpU2g5MjkyZC1kX0hrc3c=')
+  ? atob('QVEuQWI4Uk42SWwtY2ItWWNTRFdRV09PcGEtck5XNktHa3lzdDNpU2g5MjkyZC1kX0hrc3c=')
   : '';
 
 const CANDIDATE_MODELS = [
   'gemini-3.1-flash-lite',
   'gemini-3.5-flash-lite',
-  'gemini-flash-latest',
-  'gemini-3.7-flash',
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash',
   'gemini-3.8-flash',
+  'gemini-flash-latest',
 ];
 const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
 
@@ -45,7 +46,7 @@ export const isGeminiConfigured = () => {
 /**
  * Call Gemini REST generateContent API directly with multi-model fallback & timeout
  */
-async function callGeminiApi(prompt, model = DEFAULT_MODEL) {
+async function callGeminiApi(prompt, model = DEFAULT_MODEL, jsonMode = false) {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
     throw new Error('No Gemini API key configured.');
@@ -61,6 +62,15 @@ async function callGeminiApi(prompt, model = DEFAULT_MODEL) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 12000); // 12-sec safety cap
 
+      const generationConfig = {
+        temperature: 0.7,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      };
+      if (jsonMode) {
+        generationConfig.responseMimeType = 'application/json';
+      }
+
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,11 +81,7 @@ async function callGeminiApi(prompt, model = DEFAULT_MODEL) {
               parts: [{ text: prompt }],
             },
           ],
-          generationConfig: {
-            temperature: 0.7,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          },
+          generationConfig,
         }),
       });
       clearTimeout(timer);
@@ -192,7 +198,7 @@ Output ONLY valid, parseable JSON (no markdown explanation outside the JSON) wit
   "suggestedSkills": ["Skill1", "Skill2", "Skill3", "Skill4", "Skill5"]
 }`;
 
-  const raw = await callGeminiApi(prompt);
+  const raw = await callGeminiApi(prompt, DEFAULT_MODEL, true);
   const parsed = extractJson(raw);
   return {
     title: parsed.title || title,
@@ -200,7 +206,7 @@ Output ONLY valid, parseable JSON (no markdown explanation outside the JSON) wit
     requirements: Array.isArray(parsed.requirements) ? parsed.requirements.join('\n') : (parsed.requirements || ''),
     recommendedSalary: parsed.recommendedSalary || '₹10 - 18 LPA',
     suggestedSkills: Array.isArray(parsed.suggestedSkills) ? parsed.suggestedSkills : targetSkills,
-    generatedBy: 'Gemini 1.5 Flash (Direct AI)',
+    generatedBy: 'Gemini 3.1 Flash (Direct AI)',
   };
 }
 
@@ -209,27 +215,33 @@ Output ONLY valid, parseable JSON (no markdown explanation outside the JSON) wit
  */
 export async function geminiInterviewTurn({ jobRole, history = [], userMessage }) {
   const conversationContext = history
-    .slice(-6)
+    .slice(-8)
     .map((m) => `${m.sender === 'AI' ? 'Interviewer' : 'Candidate'}: ${m.message}`)
     .join('\n');
 
-  const prompt = `You are a distinguished Principal Engineer and Technical Hiring Manager conducting an interactive technical mock interview for the position: "${jobRole}".
+  const prompt = `You are a friendly, distinguished Principal Engineer and Technical Hiring Manager conducting an interactive technical mock interview for the position: "${jobRole}".
 
-Recent Conversation:
-${conversationContext}
+Recent Conversation Transcript:
+${conversationContext || 'No previous turns.'}
 
 Candidate just said:
 "${userMessage}"
 
-Evaluate their response with constructive coaching, and provide the next realistic interview question.
+Interview Guidelines:
+1. Act as a real, conversational, and highly knowledgeable interviewer.
+2. If the candidate gives a very brief answer, mentions a topic (such as "OOPs", "data structures", "microservices"), or asks to explore a subject, adapt naturally: briefly acknowledge the topic with practical insight (e.g. key principles, real-world patterns) and then ask a relevant, scenario-based interview question.
+3. If they give a detailed answer, evaluate their technical choices, architectural trade-offs, and metrics, and follow up with a deeper or adjacent question.
+4. NEVER repeat previous questions or generic canned phrases. Keep the conversation engaging and progressive.
+5. Provide a constructive coach feedback tip with concrete advice.
+
 Respond in strict JSON with ONLY these keys:
 {
-  "score": 85,
-  "feedback": "1-2 constructive coaching sentences highlighting strengths and how to improve",
-  "message": "Your conversational reply followed by the next insightful technical or scenario-based interview question"
+  "score": <integer 0-100 rating candidate answer>,
+  "feedback": "<1-2 sentences of constructive coaching tips highlighting strengths and how to improve>",
+  "message": "<your conversational reply followed by the next insightful technical or scenario-based interview question>"
 }`;
 
-  const raw = await callGeminiApi(prompt);
+  const raw = await callGeminiApi(prompt, DEFAULT_MODEL, true);
   const parsed = extractJson(raw);
   return {
     score: typeof parsed.score === 'number' ? Math.min(100, Math.max(0, parsed.score)) : 82,
@@ -268,6 +280,6 @@ Provide a thorough, objective evaluation in strict JSON with ONLY these keys:
   ]
 }`;
 
-  const raw = await callGeminiApi(prompt);
+  const raw = await callGeminiApi(prompt, DEFAULT_MODEL, true);
   return extractJson(raw);
 }
